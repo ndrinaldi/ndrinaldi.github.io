@@ -1,0 +1,469 @@
+/* ============================================================================
+   publish kit v1 — shared design system for pages at ndrinaldi.github.io
+   Served from /kit/v1/kit.css. Cached once, shared by every published site.
+   Editing this file restyles every site ever published. That is intentional;
+   it is also why the path is versioned. Breaking changes go to /kit/v2/.
+   ========================================================================= */
+
+@font-face {
+  font-family: 'Bricolage Grotesque';
+  src: url('bricolage.woff2') format('woff2');
+  font-weight: 200 800;
+  font-stretch: 75% 100%;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+2000-206F,
+                 U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215;
+}
+
+/* ---------------------------------------------------------------- tokens --
+   Light is the primary surface: these get read in daylight, in a group chat,
+   on a phone. Dark is designed, not derived — its own steps, not an inversion.
+   --accent is the ONE thing a site overrides. Everything else stays fixed so
+   twenty sites read as one house rather than twenty themes.
+   -------------------------------------------------------------------------- */
+:root {
+  --paper:      #F5F4F1;
+  --surface:    #FFFFFF;
+  --surface-2:  #EDECE7;
+  --ink:        #15171C;
+  --ink-2:      #4C515C;   /* 7.4:1 on paper — safe for sustained reading */
+  --ink-3:      #5F6573;   /* 5.2:1 on paper — captions only */
+  --rule:       #DCDAD3;
+  --accent:     #2438DC;
+  --accent-ink: #FFFFFF;
+  --accent-wash:#E7E9FB;
+  --signal:     #B33008;   /* RESERVED: key callouts only. Never decoration. */
+  --signal-wash:#FBE9E2;
+
+  --shadow: 0 1px 2px rgb(21 23 28 / .04), 0 8px 24px -12px rgb(21 23 28 / .16);
+
+  --display: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
+  --body: ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+          Roboto, Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
+
+  --u: 8px;                       /* every vertical rhythm is a multiple */
+  --measure: 34em;
+  --pad: clamp(20px, 5.5vw, 40px);
+  --rail-h: 56px;
+  --radius: 14px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper:      #0F1116;
+    --surface:    #171A21;
+    --surface-2:  #1F232C;
+    --ink:        #E9EAED;
+    --ink-2:      #AEB4C0;
+    --ink-3:      #878E9C;
+    --rule:       #272C36;
+    --accent:     #8496FF;
+    --accent-ink: #0F1116;
+    --accent-wash:#1B2140;
+    --signal:     #FF8A5C;
+    --signal-wash:#2E1A12;
+    --shadow: 0 1px 2px rgb(0 0 0 / .4), 0 8px 24px -12px rgb(0 0 0 / .7);
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper:      #0F1116;
+  --surface:    #171A21;
+  --surface-2:  #1F232C;
+  --ink:        #E9EAED;
+  --ink-2:      #AEB4C0;
+  --ink-3:      #878E9C;
+  --rule:       #272C36;
+  --accent:     #8496FF;
+  --accent-ink: #0F1116;
+  --accent-wash:#1B2140;
+  --signal:     #FF8A5C;
+  --signal-wash:#2E1A12;
+  --shadow: 0 1px 2px rgb(0 0 0 / .4), 0 8px 24px -12px rgb(0 0 0 / .7);
+}
+
+/* ----------------------------------------------------------------- base -- */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 17px;
+  line-height: 1.62;
+  overflow-x: hidden;              /* the page never scrolls sideways */
+  padding-bottom: calc(var(--rail-h) + env(safe-area-inset-bottom, 0px) + 24px);
+  -webkit-font-smoothing: antialiased;
+}
+
+img, svg, video { max-width: 100%; height: auto; }
+
+a { color: var(--accent); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+/* ------------------------------------------------------------ structure -- */
+.wrap { width: 100%; max-width: 46rem; margin: 0 auto; padding: 0 var(--pad); }
+
+section[data-section] {
+  padding: calc(var(--u) * 7) 0 calc(var(--u) * 6);
+  scroll-margin-top: 12px;
+}
+section[data-section] + section[data-section] { border-top: 1px solid var(--rule); }
+
+/* --------------------------------------------------------------- type ---- */
+.eyebrow {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: .7rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 calc(var(--u) * 1.5);
+}
+
+h1, h2, h3 {
+  font-family: var(--display);
+  font-variation-settings: 'wdth' 92;
+  letter-spacing: -.025em;
+  text-wrap: balance;
+  margin: 0 0 calc(var(--u) * 2);
+}
+h1 { font-size: clamp(2.4rem, 10.5vw, 4.25rem); font-weight: 600; line-height: .95; letter-spacing: -.035em; }
+h2 { font-size: clamp(1.75rem, 6.5vw, 2.6rem);  font-weight: 600; line-height: 1.05; }
+h3 { font-size: clamp(1.15rem, 4.2vw, 1.4rem);  font-weight: 700; line-height: 1.2; }
+
+p, ul, ol { max-width: var(--measure); }
+p { margin: 0 0 calc(var(--u) * 2); }
+li { margin-bottom: calc(var(--u) * .75); }
+
+.lede {
+  font-size: clamp(1.1rem, 4.4vw, 1.3rem);
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.caption { font-size: .82rem; line-height: 1.45; color: var(--ink-3); }
+
+mark {
+  /* Full line-box tint with ZERO padding. Padding plus box-decoration-break
+     insets every wrapped fragment and the paragraph reads as centred; a
+     bottom-anchored gradient instead reads as a strikethrough. This is the
+     only version of the three that looks like a highlight. */
+  background: color-mix(in srgb, var(--signal) 18%, transparent);
+  color: inherit;
+  padding: 0;
+  border-radius: 2px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+/* ---------------------------------------------------------------- hero ---
+   Deliberately not the big-number template. The job of the first screen is to
+   say what this is and why the reader should spend four minutes on it. -----*/
+.hero {
+  padding: calc(var(--u) * 8) 0 calc(var(--u) * 6);
+  border-top: none !important;
+}
+.hero .lede { margin-top: calc(var(--u) * 2); }
+.hero-meta {
+  display: flex; flex-wrap: wrap; gap: calc(var(--u) * 1.5);
+  align-items: center;
+  margin-top: calc(var(--u) * 4);
+  font-size: .8rem; color: var(--ink-3);
+}
+.hero-meta > * { display: inline-flex; align-items: center; gap: 6px; }
+.hero-meta .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--ink-3); }
+
+/* --------------------------------------------------------------- takeaway --
+   The TL;DR. One per page, near the top. Uses the reserved signal color, which
+   is what makes it mean something when it appears. ------------------------ */
+.takeaway {
+  background: var(--signal-wash);
+  border-radius: var(--radius);
+  padding: calc(var(--u) * 3);
+  margin: calc(var(--u) * 3) 0;
+}
+.takeaway .eyebrow { color: var(--signal); }
+.takeaway p:last-child { margin-bottom: 0; }
+.takeaway p { font-size: 1.05rem; }
+
+/* ---------------------------------------------------------------- cards ---
+   Size varies with significance — .card.lead is for the one that matters. --*/
+.cards { display: grid; gap: calc(var(--u) * 2); margin: calc(var(--u) * 3) 0; }
+@media (min-width: 720px) { .cards.two { grid-template-columns: 1fr 1fr; } }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: calc(var(--u) * 3);
+}
+.card > :last-child { margin-bottom: 0; }
+.card h3 { margin-bottom: var(--u); }
+.card.lead {
+  border-color: transparent;
+  background: var(--accent-wash);
+}
+.card-tag {
+  font-family: var(--mono);
+  font-size: .72rem;
+  letter-spacing: .04em;
+  color: var(--ink-2);
+  text-transform: uppercase;
+}
+
+/* -------------------------------------------------------------- stat row --*/
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: calc(var(--u) * 2); margin: calc(var(--u) * 3) 0; }
+.stat { border-top: 2px solid var(--accent); padding-top: calc(var(--u) * 1.5); }
+.stat .n {
+  font-family: var(--display);
+  font-variation-settings: 'wdth' 88;
+  font-size: clamp(1.9rem, 7vw, 2.5rem);
+  font-weight: 600; line-height: 1; letter-spacing: -.03em;
+  display: block;
+}
+.stat .k { font-size: .82rem; color: var(--ink-2); margin-top: 6px; display: block; }
+
+/* --------------------------------------------------------------- compare --
+   Wide content scrolls inside its own container, never the body. ---------- */
+.scroller {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: calc(var(--u) * 3) 0;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+th, td { text-align: left; padding: calc(var(--u) * 1.5) calc(var(--u) * 2); border-bottom: 1px solid var(--rule); white-space: nowrap; }
+th {
+  font-family: var(--display); font-weight: 700; font-size: .72rem;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2);
+  position: sticky; top: 0; background: var(--surface);
+}
+tbody tr:last-child td { border-bottom: none; }
+td.wrap-cell { white-space: normal; min-width: 16rem; }
+
+/* -------------------------------------------------------------- timeline --*/
+.timeline { list-style: none; padding: 0; margin: calc(var(--u) * 3) 0; }
+.timeline li {
+  position: relative; padding: 0 0 calc(var(--u) * 3) calc(var(--u) * 3.5);
+  border-left: 1px solid var(--rule);
+}
+.timeline li:last-child { border-left-color: transparent; padding-bottom: 0; }
+.timeline li::before {
+  content: ''; position: absolute; left: -4.5px; top: 7px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent);
+}
+.timeline .when {
+  font-family: var(--mono); font-size: .74rem; letter-spacing: .04em;
+  color: var(--ink-3); text-transform: uppercase; display: block; margin-bottom: 4px;
+}
+
+/* -------------------------------------------------------------- details ---*/
+details {
+  border-bottom: 1px solid var(--rule);
+  padding: calc(var(--u) * 2) 0;
+}
+summary {
+  cursor: pointer; list-style: none;
+  font-family: var(--display); font-weight: 700; font-size: 1.02rem;
+  display: flex; justify-content: space-between; align-items: center; gap: var(--u);
+  min-height: 44px;
+}
+summary::-webkit-details-marker { display: none; }
+summary::after {
+  content: '+'; font-weight: 400; font-size: 1.4rem; color: var(--accent);
+  line-height: 1; flex: none;
+}
+details[open] summary::after { content: '\2212'; }
+details > :not(summary) { margin-top: var(--u); color: var(--ink-2); }
+
+/* -------------------------------------------------------------- sources ---*/
+.sources { list-style: none; padding: 0; margin: calc(var(--u) * 2) 0 0; font-size: .9rem; }
+.sources li { padding: calc(var(--u) * 1.5) 0; border-bottom: 1px solid var(--rule); }
+.sources .host { font-family: var(--mono); font-size: .74rem; color: var(--ink-3); display: block; }
+
+/* ============================ the rail ====================================
+   The signature element. Fixed in the thumb zone, it names where you are and
+   fills as you read — so the dots are a progress instrument, not decoration,
+   which is what earns the motion. Tap expands the full contents.
+   ========================================================================= */
+.rail {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
+  z-index: 60;
+  width: min(calc(100vw - 24px), 30rem);
+  background: var(--surface);
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+  backdrop-filter: blur(18px) saturate(1.5);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+  transition: border-radius .22s ease;
+}
+.rail[data-open="true"] { border-radius: 22px; }
+
+.rail-bar {
+  display: flex; align-items: center; gap: calc(var(--u) * 1.5);
+  height: var(--rail-h); padding: 0 6px 0 18px;
+  width: 100%; background: none; border: 0; cursor: pointer;
+  font: inherit; color: var(--ink); text-align: left;
+}
+.rail-now {
+  flex: 1; min-width: 0;
+  font-family: var(--display); font-weight: 700; font-size: .88rem;
+  letter-spacing: -.01em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.rail-dots { display: flex; gap: 5px; flex: none; }
+.rail-dots i {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--rule); display: block;
+  transition: background .3s ease, transform .3s ease;
+}
+.rail-dots i[data-state="read"] { background: var(--ink-3); }
+.rail-dots i[data-state="here"] { background: var(--accent); transform: scale(1.5); }
+.rail-toggle {
+  flex: none; width: 44px; height: 44px; border-radius: 999px;
+  display: grid; place-items: center; color: var(--ink-2);
+}
+.rail-toggle svg { transition: transform .22s ease; }
+.rail[data-open="true"] .rail-toggle svg { transform: rotate(180deg); }
+
+.rail-sheet {
+  display: none; padding: 4px 8px calc(var(--u) * 1.5);
+  max-height: min(52vh, 420px); overflow-y: auto;
+}
+.rail[data-open="true"] .rail-sheet { display: block; }
+.rail-sheet a {
+  display: flex; align-items: baseline; gap: 10px;
+  padding: 11px 12px; border-radius: 10px;
+  color: var(--ink); text-decoration: none; font-size: .95rem;
+  min-height: 44px;
+}
+.rail-sheet a:hover { background: var(--surface-2); }
+.rail-sheet a[aria-current="true"] { color: var(--accent); font-weight: 600; }
+.rail-sheet .idx { font-family: var(--mono); font-size: .72rem; color: var(--ink-3); flex: none; }
+.rail-theme {
+  display: flex; align-items: baseline; gap: 10px; width: 100%;
+  padding: 11px 12px; min-height: 44px; border-radius: 10px;
+  background: none; border: 0; border-top: 1px solid var(--rule);
+  margin-top: 4px; cursor: pointer;
+  font: inherit; font-size: .95rem; color: var(--ink-2); text-align: left;
+}
+.rail-theme:hover { background: var(--surface-2); }
+
+/* reading progress hairline, pinned to the very top */
+.progress {
+  position: fixed; top: 0; left: 0; height: 2px; width: 100%;
+  background: transparent; z-index: 70; pointer-events: none;
+}
+.progress > i {
+  display: block; height: 100%; width: 0%;
+  background: var(--accent); transform-origin: left;
+}
+
+/* theme toggle lives with the hero, not the rail — the rail is for place */
+.theme-btn {
+  background: none; border: 1px solid var(--rule); color: var(--ink-2);
+  width: 44px; height: 44px; border-radius: 999px; cursor: pointer;
+  display: grid; place-items: center; flex: none;
+}
+
+/* --------------------------------------------------------------- footer ---*/
+.foot {
+  border-top: 1px solid var(--rule);
+  padding: calc(var(--u) * 5) 0 calc(var(--u) * 3);
+  font-size: .84rem; color: var(--ink-3);
+}
+.foot p { max-width: none; }
+
+/* ----------------------------------------------------------- print/HC ---- */
+@media (forced-colors: active) {
+  .card, .rail, .scroller { border: 1px solid CanvasText; }
+  .rail-dots i[data-state="here"] { background: Highlight; }
+}
+
+/* ============================= charts =====================================
+   Three categorical hues, not five. Validated with the dataviz validator at
+   --pairs all in BOTH modes (light surface #F5F4F1, dark #0F1116): lightness
+   band, chroma floor, CVD separation, normal-vision floor, contrast — all
+   PASS. A fourth series does not get a fourth hue; it folds into "Other" or
+   the chart facets. That constraint is the finding, not a shortcut: blue and
+   purple cannot be told apart under protanopia at any lightness that also
+   clears the dark-mode band.
+
+   Bars are HTML, not SVG. They reflow at 320px, the labels are real text for
+   screen readers and translation, and there is no viewBox arithmetic to get
+   wrong on a phone.
+   ========================================================================= */
+:root {
+  --cat-1: #2438DC;
+  --cat-2: #B33008;
+  --cat-3: #0B8A63;
+  --track: #E4E2DC;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --cat-1: #6E86F2; --cat-2: #E06A3A; --cat-3: #12A176; --track: #232833;
+  }
+}
+:root[data-theme="dark"] { --cat-1: #6E86F2; --cat-2: #E06A3A; --cat-3: #12A176; --track: #232833; }
+
+.chart { margin: calc(var(--u) * 3) 0; }
+.chart-title {
+  font-family: var(--display); font-weight: 700; font-size: .95rem;
+  margin: 0 0 4px;
+}
+.chart-note { font-size: .82rem; color: var(--ink-3); margin: 0 0 calc(var(--u) * 2); }
+
+.bars { display: grid; gap: calc(var(--u) * 1.5); margin: 0; padding: 0; }
+.bar { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; align-items: baseline; }
+.bar-k { font-size: .88rem; color: var(--ink-2); }
+.bar-v {
+  font-family: var(--mono); font-size: .82rem; color: var(--ink);
+  font-variant-numeric: tabular-nums;      /* direct labels, always */
+}
+.bar-track {
+  grid-column: 1 / -1;
+  background: var(--track);
+  border-radius: 3px;
+  height: 10px;
+  overflow: hidden;
+}
+.bar-fill {
+  display: block; height: 100%;
+  background: var(--cat-1);
+  border-radius: 0 4px 4px 0;              /* rounded data-end, anchored left */
+  transition: width .5s cubic-bezier(.2,.7,.3,1);
+}
+.bar[data-series="2"] .bar-fill { background: var(--cat-2); }
+.bar[data-series="3"] .bar-fill { background: var(--cat-3); }
+.bar[data-emphasis="true"] .bar-k { color: var(--ink); font-weight: 600; }
+
+.legend {
+  display: flex; flex-wrap: wrap; gap: calc(var(--u) * 2);
+  margin: calc(var(--u) * 2) 0 0; padding: 0; list-style: none;
+  font-size: .82rem; color: var(--ink-2);
+}
+.legend li { display: inline-flex; align-items: center; gap: 7px; margin: 0; }
+.legend .swatch { width: 10px; height: 10px; border-radius: 3px; flex: none; }
