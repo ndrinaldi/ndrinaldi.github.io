@@ -1,3 +1,5 @@
+/* RETIRED 2026-08-16. Frozen only so nova-pizza and kit-demo keep rendering.
+   New pages must NOT link this. The kit approach was dropped deliberately. */
 /* ============================================================================
    publish kit v1 — shared design system for pages at ndrinaldi.github.io
    Served from /kit/v1/kit.css. Cached once, shared by every published site.
