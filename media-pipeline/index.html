@@ -472,7 +472,7 @@ const STEPS = [
  {at:'prowlarr',who:'The index',say:'The librarian asks the index: where can I get this, and which copy is best?',
   tech:'Sonarr queries every indexer Prowlarr has synced to it, scores each release against the quality profile and the custom formats Recyclarr keeps current, and picks the top one.',wire:['sonarr','prowlarr']},
  {at:'usenet',who:'The fast lane',say:'Most of the time the file comes down the fast lane from the paid archive, in a minute or two.',
-  tech:'Sonarr hands the NZB to SABnzbd, which downloads over SSL from Newshosting, verifies and repairs the pieces, and unpacks into the completed folder.',wire:['prowlarr','usenet']},
+  tech:'Sonarr hands the NZB to SABnzbd, which downloads over SSL from a paid Usenet provider, verifies and repairs the pieces, and unpacks into the completed folder.',wire:['prowlarr','usenet']},
  {at:'torrent',who:'The shared lane',say:'If the archive does not have it, the shared lane fetches it from other people, inside the privacy tunnel.',
   tech:'The torrent goes to qBittorrent, whose only network is the Gluetun VPN container. If the tunnel drops, transfer stops; it cannot leak.',wire:['prowlarr','torrent']},
  {at:'disk',who:'The librarian again',say:'The finished file is filed on the box’s small fast disk, renamed so the TV app understands it.',
