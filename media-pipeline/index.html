@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="light dark">
+<title>How a show gets to the TV</title>
+<style>
+@font-face{font-family:"Bricolage";src:url(bricolage.woff2) format("woff2-variations");font-weight:200 800;font-stretch:75% 100%;font-display:swap}
+:root{
+  --bg:#f5f1e8;--bg2:#ece6d8;--card:#fffdf8;--ink:#1c1a16;--ink2:#524d43;--line:#d8d0bf;
+  --ember:#c2410c;--ember-ink:#ffffff;--ember-soft:#fbe3d3;--ember-text:#9a3412;
+  --sky:#1e5f8a;--sky-soft:#d7e8f2;
+  --moss:#2f6b3a;--moss-soft:#d9ead9;
+  --plum:#6b3a8a;--plum-soft:#e8dcf1;
+  --focus:#1e5f8a;
+  --shadow:0 12px 40px rgba(40,30,10,.14);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121316;--bg2:#1a1c21;--card:#1f2228;--ink:#ede8dd;--ink2:#b3ad9f;--line:#33363d;
+  --ember:#ff8a50;--ember-ink:#1a0d05;--ember-soft:#3a2418;--ember-text:#ff8a50;
+  --sky:#7dc0ea;--sky-soft:#1a3141;
+  --moss:#8fd19a;--moss-soft:#1c3322;
+  --plum:#c9a3e6;--plum-soft:#31223d;
+  --focus:#7dc0ea;
+  --shadow:0 12px 40px rgba(0,0,0,.5);
+}}
+:root[data-theme="dark"]{
+  --bg:#121316;--bg2:#1a1c21;--card:#1f2228;--ink:#ede8dd;--ink2:#b3ad9f;--line:#33363d;
+  --ember:#ff8a50;--ember-ink:#1a0d05;--ember-soft:#3a2418;--ember-text:#ff8a50;
+  --sky:#7dc0ea;--sky-soft:#1a3141;
+  --moss:#8fd19a;--moss-soft:#1c3322;
+  --plum:#c9a3e6;--plum-soft:#31223d;
+  --focus:#7dc0ea;
+  --shadow:0 12px 40px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 "Bricolage",Georgia,serif;overflow-x:hidden}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px;border-radius:6px}
+button{font:inherit;color:inherit}
+h1,h2,h3{font-weight:700;letter-spacing:-.02em;line-height:1.05;margin:0}
+h1{font-size:clamp(2.6rem,11vw,4.2rem);font-stretch:85%;font-weight:800}
+h2{font-size:1.75rem;font-stretch:90%}
+h3{font-size:1.15rem}
+p{margin:0}
+.wrap{max-width:640px;margin:0 auto;padding:0 20px}
+.eyebrow{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ember);font-weight:700}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- hero ---------- */
+.hero{padding:calc(28px + env(safe-area-inset-top)) 0 12px}
+.hero h1 span{color:var(--ember);display:block}
+.hero .sub{margin-top:14px;color:var(--ink2);font-size:1.05rem;max-width:32ch}
+.hero .start{display:inline-flex;align-items:center;gap:10px;margin-top:22px;background:var(--ink);color:var(--bg);border:0;border-radius:999px;padding:14px 22px;font-weight:700;font-size:1rem;text-decoration:none;min-height:48px}
+.hero .start svg{width:18px;height:18px}
+
+/* ---------- journey ---------- */
+.journey{padding:28px 0 0}
+.mode{display:inline-flex;background:var(--bg2);border:1px solid var(--line);border-radius:999px;padding:3px;margin-top:14px}
+.mode button{border:0;background:transparent;border-radius:999px;padding:9px 16px;min-height:44px;color:var(--ink2);font-weight:600;font-size:.92rem}
+.mode button[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.map{margin:16px -20px 0;padding:0 8px;position:relative}
+.map svg{width:100%;height:auto;display:block;overflow:visible}
+.node{cursor:pointer}
+.node rect{fill:var(--card);stroke:var(--line);stroke-width:1.5;transition:stroke .25s,fill .25s}
+.node text{fill:var(--ink);font:600 12px/1 "Bricolage",Georgia,serif;pointer-events:none}
+.node .ic{fill:none;stroke:var(--ink2);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;transition:stroke .25s}
+.node.on rect{stroke:var(--ember);stroke-width:2.5;fill:var(--ember-soft)}
+.node.on .ic{stroke:var(--ember)}
+.node.done rect{stroke:var(--moss)}
+.node:focus-visible{outline:none}
+.node:focus-visible rect{stroke:var(--focus);stroke-width:3}
+.wire{fill:none;stroke:var(--line);stroke-width:2;stroke-linecap:round}
+.wire.lit{stroke:var(--ember);stroke-dasharray:6 6;animation:march 1.2s linear infinite}
+@keyframes march{to{stroke-dashoffset:-24}}
+.marker{filter:drop-shadow(0 2px 6px rgba(194,65,12,.5))}
+.marker circle{fill:var(--ember)}
+.marker path{fill:var(--ember-ink)}
+
+.scene{margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px 20px 22px;min-height:190px;box-shadow:var(--shadow)}
+.scene .step{font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ember);font-weight:700}
+.scene .who{margin-top:4px;font-size:.95rem;color:var(--ink2)}
+.scene .who b{color:var(--ink)}
+.scene .say{margin-top:12px;font-size:1.28rem;line-height:1.3;font-weight:600;letter-spacing:-.01em}
+.scene .tech{margin-top:12px;color:var(--ink2);font-size:.98rem;border-left:3px solid var(--sky);padding-left:12px}
+.scene .tech code{font:.9em ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--bg2);padding:1px 5px;border-radius:4px;color:var(--ink)}
+.scene .peek{margin-top:14px;display:inline-flex;align-items:center;gap:6px;background:transparent;border:1px solid var(--line);border-radius:999px;padding:9px 14px;min-height:44px;font-size:.9rem;font-weight:600;color:var(--sky)}
+.scene .peek svg{width:14px;height:14px}
+.dots{display:flex;gap:6px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+.dots button{width:44px;height:44px;border:0;background:transparent;padding:0;display:grid;place-items:center}
+.dots button i{display:block;width:8px;height:8px;border-radius:50%;background:var(--line);transition:transform .2s,background .2s}
+.dots button[aria-current="step"] i{background:var(--ember);transform:scale(1.6)}
+.dots button.done i{background:var(--moss)}
+
+/* controls in the thumb zone */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:10px 14px calc(10px + env(safe-area-inset-bottom));display:flex;gap:10px;align-items:center;justify-content:center;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);transform:translateY(110%);transition:transform .25s}
+.bar.show{transform:none}
+.bar button{border:1px solid var(--line);background:var(--card);border-radius:999px;min-height:50px;padding:0 18px;font-weight:700;font-size:1rem;display:inline-flex;align-items:center;gap:8px}
+.bar button svg{width:18px;height:18px}
+.bar .next{background:var(--ember);color:var(--ember-ink);border-color:var(--ember);flex:1;max-width:220px;justify-content:center}
+.bar .prev{width:50px;padding:0;justify-content:center}
+.bar .play{width:50px;padding:0;justify-content:center}
+.bar .count{font-variant-numeric:tabular-nums;color:var(--ink2);font-size:.9rem;min-width:44px;text-align:center}
+
+/* ---------- parts ---------- */
+section.parts{padding:44px 0 0}
+.group{margin-top:26px}
+.group h3{font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);font-weight:700;margin-bottom:10px}
+.cards{display:grid;gap:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:0;overflow:hidden}
+.card summary{list-style:none;cursor:pointer;padding:16px 18px;display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;min-height:64px}
+.card summary::-webkit-details-marker{display:none}
+.card summary .glyph{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--bg2)}
+.card summary .glyph svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.card summary .t b{display:block;font-size:1.05rem;line-height:1.2}
+.card summary .t span{display:block;color:var(--ink2);font-size:.85rem;margin-top:2px}
+.card summary .chev{width:20px;height:20px;transition:transform .2s;color:var(--ink2)}
+.card[open] summary .chev{transform:rotate(180deg)}
+.card .body{padding:0 18px 18px 18px}
+.card .body p{margin-top:0}
+.card .body .real{color:var(--ink2);font-size:.9rem;margin-top:10px}
+.card .body .real b{color:var(--ink);font-weight:700}
+.card .hood{margin-top:12px;border-top:1px dashed var(--line);padding-top:12px;color:var(--ink2);font-size:.95rem}
+.card .hood .lbl{font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--sky);font-weight:700;display:block;margin-bottom:4px}
+.tag{display:inline-block;font-style:normal;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;font-weight:700;padding:3px 8px;border-radius:999px;margin-left:6px;vertical-align:middle}
+.tag.new{background:var(--ember-soft);color:var(--ember-text)}
+.tag.soon{background:var(--sky-soft);color:var(--sky)}
+.c-ember .glyph{color:var(--ember);background:var(--ember-soft)}
+.c-sky .glyph{color:var(--sky);background:var(--sky-soft)}
+.c-moss .glyph{color:var(--moss);background:var(--moss-soft)}
+.c-plum .glyph{color:var(--plum);background:var(--plum-soft)}
+
+/* ---------- two lanes ---------- */
+section.lanes{padding:44px 0 0}
+.lanegrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.lane{border-radius:18px;padding:16px;border:1px solid var(--line);background:var(--card)}
+.lane h3{font-size:1rem}
+.lane .k{font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700;margin-bottom:6px}
+.lane ul{margin:10px 0 0;padding:0;list-style:none;font-size:.92rem;color:var(--ink2)}
+.lane li{padding:6px 0;border-top:1px dashed var(--line)}
+.lane li b{color:var(--ink)}
+.lane.u .k{color:var(--moss)}
+.lane.t .k{color:var(--plum)}
+.lanes .why{margin-top:14px;color:var(--ink2);font-size:.98rem}
+@media (max-width:360px){.lanegrid{grid-template-columns:1fr}}
+
+/* ---------- storage timeline ---------- */
+section.store{padding:44px 0 0}
+.timeline{margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px}
+.timeline svg{width:100%;height:auto;display:block}
+.timeline .cap{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px;font-size:.92rem;color:var(--ink2)}
+.timeline .cap b{color:var(--ink);display:block;font-size:.98rem}
+.timeline .same{margin-top:14px;padding:12px 14px;border-radius:12px;background:var(--moss-soft);color:var(--ink);font-weight:600;font-size:.95rem}
+
+/* ---------- assistant ---------- */
+section.asst{padding:44px 0 0}
+.asst .lede{margin-top:12px;color:var(--ink2);max-width:40ch}
+.does{margin-top:18px;display:grid;gap:8px}
+.does .row{display:grid;grid-template-columns:40px 1fr;gap:12px;align-items:start;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.does .row .ico{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;background:var(--plum-soft);color:var(--plum)}
+.does .row .ico svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.does .row b{display:block}
+.does .row span{color:var(--ink2);font-size:.92rem}
+.cant{margin-top:22px;border-radius:18px;padding:18px;background:var(--bg2);border:1px solid var(--line)}
+.cant h3{font-size:1rem}
+.cant ul{margin:10px 0 0;padding-left:0;list-style:none}
+.cant li{display:grid;grid-template-columns:22px 1fr;gap:10px;padding:8px 0;border-top:1px dashed var(--line);font-size:.95rem;color:var(--ink2)}
+.cant li b{color:var(--ink)}
+.cant li svg{width:20px;height:20px;stroke:var(--ember);fill:none;stroke-width:2.2;stroke-linecap:round;margin-top:2px}
+.reach{margin-top:14px;padding:16px;border-radius:16px;background:var(--plum-soft);color:var(--ink);font-size:.95rem}
+.reach b{display:block;margin-bottom:4px}
+
+footer{padding:44px 0 calc(110px + env(safe-area-inset-bottom));color:var(--ink2);font-size:.85rem}
+footer p+p{margin-top:6px}
+
+/* ---------- bottom sheet ---------- */
+.veil{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:30;opacity:0;pointer-events:none;transition:opacity .25s}
+.veil.show{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:31;background:var(--card);border-radius:24px 24px 0 0;padding:10px 20px calc(20px + env(safe-area-inset-bottom));max-height:82dvh;overflow:auto;transform:translateY(105%);transition:transform .3s cubic-bezier(.2,.8,.2,1);box-shadow:var(--shadow);max-width:640px;margin:0 auto}
+.sheet.show{transform:none}
+.sheet .grip{width:44px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 10px}
+.sheet .head{display:grid;grid-template-columns:48px 1fr auto;gap:12px;align-items:center}
+.sheet .head .glyph{width:48px;height:48px;border-radius:14px;display:grid;place-items:center}
+.sheet .head .glyph svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sheet .head b{display:block;font-size:1.25rem;line-height:1.15}
+.sheet .head span{display:block;color:var(--ink2);font-size:.9rem}
+.sheet .close{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--bg2);display:grid;place-items:center}
+.sheet .close svg{width:18px;height:18px;stroke:var(--ink);stroke-width:2.2;fill:none;stroke-linecap:round}
+.sheet .body{margin-top:14px}
+.sheet .body .real{color:var(--ink2);font-size:.9rem;margin-top:10px}
+.sheet .body .real b{color:var(--ink)}
+.sheet .hood{margin-top:12px;border-top:1px dashed var(--line);padding-top:12px;color:var(--ink2);font-size:.95rem}
+.sheet .hood .lbl{font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--sky);font-weight:700;display:block;margin-bottom:4px}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important}
+}
+@media (min-width:640px){
+  .map{margin:16px 0 0;padding:0}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">The house media system</p>
+    <h1>How a show gets <span>to the TV</span></h1>
+    <p class="sub">You tap a title on your phone. A few minutes later it is on the Fire TV. This is what happens in between, and where the assistant fits.</p>
+    <a class="start" href="#journey">Follow one show
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </a>
+  </div>
+</header>
+
+<main>
+<section class="journey" id="journey" aria-labelledby="jh">
+  <div class="wrap">
+    <p class="eyebrow">Follow one show</p>
+    <h2 id="jh">From a tap to the TV</h2>
+    <div class="mode" role="group" aria-label="Explanation level">
+      <button type="button" id="modePlain" aria-pressed="true">Plain words</button>
+      <button type="button" id="modeTech" aria-pressed="false">Under the hood</button>
+    </div>
+
+    <div class="map">
+      <svg id="map" viewBox="0 0 390 420" role="group" aria-label="Map of the pipeline. Tap a box to learn about that part.">
+        <!-- wires (drawn by JS from node positions) -->
+        <g id="wires"></g>
+        <!-- nodes (drawn by JS) -->
+        <g id="nodes"></g>
+        <!-- moving marker -->
+        <g class="marker" id="marker" aria-hidden="true">
+          <circle r="9"/>
+          <path d="M-3 -3.8v7.6l6.2-3.8z"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="scene" id="scene" aria-live="polite">
+      <p class="step" id="sStep">Step 1 of 11</p>
+      <p class="who" id="sWho"></p>
+      <p class="say" id="sSay"></p>
+      <p class="tech" id="sTech" hidden></p>
+      <button type="button" class="peek" id="peekBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+        <span id="peekLbl">About this part</span>
+      </button>
+    </div>
+    <div class="dots" id="dots" role="tablist" aria-label="Steps"></div>
+  </div>
+</section>
+
+<section class="parts" id="parts" aria-labelledby="ph">
+  <div class="wrap">
+    <p class="eyebrow">The parts</p>
+    <h2 id="ph">Every piece, in plain words first</h2>
+    <div id="groups"></div>
+  </div>
+</section>
+
+<section class="lanes" aria-labelledby="lh">
+  <div class="wrap">
+    <p class="eyebrow">Two ways in</p>
+    <h2 id="lh">Why files arrive two different ways</h2>
+    <div class="lanegrid">
+      <div class="lane u">
+        <p class="k">Fast lane</p>
+        <h3>Usenet</h3>
+        <ul>
+          <li><b>Feels like</b> a paid, private download from one big server.</li>
+          <li><b>Speed</b> as fast as the internet line allows.</li>
+          <li><b>Privacy</b> an encrypted connection to one provider. No VPN needed.</li>
+          <li><b>Catch</b> not everything is there, especially fan-subtitled anime.</li>
+        </ul>
+      </div>
+      <div class="lane t">
+        <p class="k">Shared lane</p>
+        <h3>BitTorrent</h3>
+        <ul>
+          <li><b>Feels like</b> many people each sending a piece of the file.</li>
+          <li><b>Speed</b> depends on how many people have it.</li>
+          <li><b>Privacy</b> everything goes through a VPN. If the VPN drops, it stops instead of leaking.</li>
+          <li><b>Catch</b> slower for rare titles, and the file is shared back for a while.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="why">The librarian tries the fast lane first. When the index only finds a title on the shared lane, it goes that way instead. You never choose; it just shows up.</p>
+  </div>
+</section>
+
+<section class="store" aria-labelledby="sh">
+  <div class="wrap">
+    <p class="eyebrow">Where the file lives <i class="tag new">new today</i></p>
+    <h2 id="sh">A few hours on the box, then the cloud</h2>
+    <div class="timeline">
+      <svg viewBox="0 0 360 120" role="img" aria-label="Timeline: a new file sits on the small local disk for a few hours, then moves to cloud storage. Playback is the same from either.">
+        <defs>
+          <linearGradient id="tl" gradientUnits="userSpaceOnUse" x1="24" y1="60" x2="336" y2="60"><stop offset="0" stop-color="var(--ember)"/><stop offset="1" stop-color="var(--sky)"/></linearGradient>
+        </defs>
+        <line x1="24" y1="60" x2="336" y2="60" stroke="url(#tl)" stroke-width="4" stroke-linecap="round"/>
+        <g font-family="Bricolage,Georgia,serif" font-size="12" font-weight="600" fill="var(--ink)" text-anchor="middle">
+          <circle cx="40" cy="60" r="12" fill="var(--ember)"/>
+          <text x="40" y="94">arrives</text>
+          <text x="40" y="34" fill="var(--ink2)" font-weight="500">0 h</text>
+          <circle cx="150" cy="60" r="12" fill="var(--ember)"/>
+          <text x="150" y="94">local disk</text>
+          <text x="150" y="34" fill="var(--ink2)" font-weight="500">fast, small</text>
+          <circle cx="300" cy="60" r="12" fill="var(--sky)"/>
+          <text x="300" y="94">cloud</text>
+          <text x="300" y="34" fill="var(--ink2)" font-weight="500">after ~6 h, for good</text>
+        </g>
+      </svg>
+      <div class="cap">
+        <div><b>Local disk</b>The box's own drive. Small, fast, and only for what just arrived.</div>
+        <div><b>Cloud</b>Storage rented from Amazon. Grows without buying drives; three copies in three buildings.</div>
+      </div>
+      <p class="same">Playback is the same either way. The TV never knows which one it is reading from.</p>
+    </div>
+  </div>
+</section>
+
+<section class="asst" id="assistant" aria-labelledby="ah">
+  <div class="wrap">
+    <p class="eyebrow">Where the assistant fits</p>
+    <h2 id="ah">Someone is always watching the pipeline</h2>
+    <p class="lede">A Claude assistant runs on the box in the house. It is the reason a stuck download usually fixes itself before anyone notices.</p>
+    <div class="does">
+      <div class="row"><div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></div><div><b>Checks health every half hour</b><span>Are the parts running, is the disk filling up, did a download fail, is the VPN still up.</span></div></div>
+      <div class="row"><div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2-2z"/></svg></div><div><b>Unsticks downloads on its own</b><span>A bad file, a stalled queue, an episode that never got filed. It clears it and grabs another copy.</span></div></div>
+      <div class="row"><div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></div><div><b>Adds shows Nick asks for by text</b><span>"Grab season 2 of X" becomes a request in the librarian, with the right quality picked.</span></div></div>
+      <div class="row"><div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4M11 8v3l2 2"/></svg></div><div><b>Answers "why isn't X showing up"</b><span>It walks the same path this page does and reports the one step where the title got stuck.</span></div></div>
+    </div>
+    <div class="reach"><b>How it is reached</b>From Nick's phone, through the Claude app. It runs on the box and talks to the parts directly; the phone is just the remote.</div>
+    <div class="cant">
+      <h3>What it deliberately cannot do</h3>
+      <ul>
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg><div><b>Touch anything outside the media system.</b> The box's settings, the home network, the router, other accounts. If a fix needs those, it writes a note for Nick instead.</div></li>
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg><div><b>Message anyone on its own.</b> It has no way to text or email. Problems it cannot fix wait in an inbox Nick reads.</div></li>
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg><div><b>Open the library to the internet.</b> Sharing stays a Plex invite that Nick sends by hand.</div></li>
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg><div><b>Turn the VPN off.</b> The torrent app has no network except the tunnel; there is no switch to flip.</div></li>
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg><div><b>See your phone.</b> It sees what Plex played and what was requested, nothing else.</div></li>
+      </ul>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Written for the household, September 2026.</p>
+    <p>Tap any box on the map, or any card, for the longer version.</p>
+  </div>
+</footer>
+
+<div class="bar" id="bar">
+  <button type="button" class="prev" id="prev" aria-label="Previous step"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
+  <span class="count" id="count">1 / 11</span>
+  <button type="button" class="next" id="next">Next <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+  <button type="button" class="play" id="play" aria-label="Play through all steps" aria-pressed="false"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></button>
+</div>
+
+<div class="veil" id="veil"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="shTitle" hidden>
+  <div class="grip"></div>
+  <div class="head">
+    <div class="glyph" id="shGlyph"></div>
+    <div><b id="shTitle"></b><span id="shSub"></span></div>
+    <button type="button" class="close" id="shClose" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="body" id="shBody"></div>
+</div>
+
+<script>
+/* ------------------------------------------------------------------ data */
+const ICONS = {
+  phone:'<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>',
+  book:'<path d="M4 4h6a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4z"/><path d="M20 4h-6a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h7z"/>',
+  film:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/>',
+  index:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4M8 11h6M11 8v6"/>',
+  bolt:'<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+  peers:'<circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.2 11l7.6-4M8.2 13l7.6 4"/>',
+  shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
+  caption:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 12h4M13 12h4M7 15.5h10"/>',
+  ruler:'<path d="M3 17L17 3l4 4L7 21z"/><path d="M14 6l1.5 1.5M11 9l1.5 1.5M8 12l1.5 1.5"/>',
+  chart:'<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>',
+  play:'<circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5z"/>',
+  box:'<path d="M3 8l9-4 9 4-9 4z"/><path d="M3 8v8l9 4 9-4V8M12 12v8"/>',
+  mac:'<rect x="3" y="9" width="18" height="7" rx="2"/><path d="M7 12.5h.01M11 12.5h6"/>',
+  tunnel:'<path d="M4 20v-8a8 8 0 0 1 16 0v8"/><path d="M9 20v-6a3 3 0 0 1 6 0v6"/>',
+  disk:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.5"/><path d="M12 3v3M12 18v3"/>',
+  cloud:'<path d="M7 18a4 4 0 0 1-.5-8A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9z"/>',
+  tv:'<rect x="2" y="5" width="20" height="13" rx="2"/><path d="M8 21h8"/>',
+  spark:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 17l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/>'
+};
+
+const PARTS = [
+ {id:'phone',g:'Your side',c:'ember',ic:'phone',name:'Your phone and the request app',real:'Jellyseerr',
+  plain:'The app where you search for a show or movie and tap Request. You sign in with the same account you use for the TV app. It also shows whether something is on its way.',
+  tech:'Jellyseerr. Logs in against Plex, so anyone Nick has shared the server with can request. Requests are forwarded to Sonarr (series) or Radarr (films) with a default quality profile. New users get request-only permission, so Nick approves each ask until he trusts the account.'},
+ {id:'tv',g:'Your side',c:'ember',ic:'tv',name:'The Fire TV and the Plex app',real:'Plex clients',
+  plain:'The TV app you already use. Same on your phone. It talks to the box in the house; if you are away from home it still works.',
+  tech:'Plex clients on Fire TV Stick and phones. They connect to the Plex server on the mini. Away from home the connection goes through Plex’s relay or a direct remote-access route; in-house it is the local network. The server converts video on the fly when a device cannot play the original.'},
+ {id:'sonarr',g:'The librarians',c:'sky',ic:'book',name:'The TV librarian',real:'Sonarr',
+  plain:'Keeps a list of every series the household wants, notices when a new episode is out, goes and gets it, and files it neatly with the right name so the TV app understands it.',
+  tech:'Sonarr, covering TV and anime with separate root folders. Monitors series, matches releases against quality profiles and custom formats (anime gets its own profile favouring full-quality 1080p with dual audio), sends the grab to the download client, then imports the finished file into the library, hard-linking when the filesystem allows and copying otherwise. Notifies Plex to rescan and fires a webhook to the assistant on failures.'},
+ {id:'radarr',g:'The librarians',c:'sky',ic:'film',name:'The movie librarian',real:'Radarr',
+  plain:'Same job as the TV librarian, for films. It keeps looking for a better copy of a movie until it has the best one the rules allow.',
+  tech:'Radarr. One root folder, quality profiles for HD and Ultra-HD, its own set of custom formats. Same download clients, same indexers via Prowlarr, same Plex notification and webhook.'},
+ {id:'prowlarr',g:'The librarians',c:'sky',ic:'index',name:'The index of indexes',real:'Prowlarr',
+  plain:'The librarians do not search the whole internet. They ask this one card catalogue, which knows where things are listed and returns the options.',
+  tech:'Prowlarr. Holds the indexer definitions once (two Usenet indexers and one public anime tracker today) and syncs them into Sonarr and Radarr, so an indexer is added or fixed in one place. When an indexer lapses, every search silently returns nothing, which is the first thing the assistant checks.'},
+ {id:'usenet',g:'How files arrive',c:'moss',ic:'bolt',name:'The fast lane',real:'SABnzbd + Newshosting',
+  plain:'A paid service that holds an enormous archive of files. The box downloads straight from it, quickly and over an encrypted line. This is how most things arrive.',
+  tech:'SABnzbd pulls from Newshosting over SSL with many parallel connections, verifies the pieces, repairs any that are damaged and unpacks the result into a completed folder the librarians watch. No VPN needed: it is a client-to-provider connection, not peer-to-peer. A free-space floor pauses the queue rather than filling the boot disk.'},
+ {id:'torrent',g:'How files arrive',c:'plum',ic:'peers',name:'The shared lane',real:'qBittorrent',
+  plain:'Files that are not in the archive are fetched from other people who have them, a piece at a time. Used mostly for fan-subtitled anime.',
+  tech:'qBittorrent, used for titles the Usenet indexers do not carry (fan-sub anime from the public tracker in particular). It has no network of its own: it shares the VPN container’s network namespace, so every packet leaves through the tunnel. Hard links let a finished file appear in the library while the torrent keeps seeding.'},
+ {id:'vpn',g:'How files arrive',c:'plum',ic:'shield',name:'The privacy tunnel for the shared lane',real:'Gluetun',
+  plain:'Because the shared lane involves strangers, it runs inside a privacy tunnel. If the tunnel ever drops, the shared lane simply stops rather than continuing in the open.',
+  tech:'Gluetun, a VPN client in a container. qBittorrent runs with network_mode: service:gluetun, which is a kill switch by construction: no tunnel, no route. The assistant’s health check compares the torrent container’s public address with the box’s own and alerts if they match.'},
+ {id:'bazarr',g:'The cleanup crew',c:'moss',ic:'caption',name:'The subtitle fetcher',real:'Bazarr',soon:true,
+  plain:'Finds subtitles for what the librarians filed, so a subtitled-only anime or a foreign film has the right text ready. Still being switched on.',
+  tech:'Bazarr. Reads the series and movie lists from Sonarr and Radarr and searches subtitle providers for each file. Not yet configured as of this page: no providers and not linked to the librarians. It is on the list.'},
+ {id:'recyclarr',g:'The cleanup crew',c:'moss',ic:'ruler',name:'The quality rulebook',real:'Recyclarr',
+  plain:'A set of rules the librarians follow when choosing between copies: never a camcorder recording from a cinema, prefer the version with both languages, and so on. Refreshed automatically.',
+  tech:'Recyclarr syncs community-maintained quality profiles and custom formats (the TRaSH guides) into Sonarr and Radarr on a weekly schedule. It is why there are 70-odd custom formats in Sonarr that nobody typed by hand, and why a cam rip scores below zero.'},
+ {id:'tautulli',g:'The cleanup crew',c:'moss',ic:'chart',name:'The watch log',real:'Tautulli',soon:true,
+  plain:'Keeps a diary of what was watched, on which device, and whether it played smoothly. This is how the assistant can tell what is being watched without anyone reporting it.',
+  tech:'Tautulli sits beside Plex and records history, per-user stats and stream details (direct play vs transcode, bitrate, buffering). Plex itself keeps almost none of this. Installed for the assistant, not for a dashboard: it is the API behind “who watched what” and “why did that buffer”. Being linked to the server now.'},
+ {id:'plex',g:'On the box',c:'ember',ic:'play',name:'The TV app’s brain',real:'Plex Media Server',
+  plain:'The part that reads the library, fetches posters and descriptions, remembers where you stopped, and sends the video to whichever screen asked for it.',
+  tech:'Plex Media Server, installed natively on the Mac rather than in a container so it can use the M4’s hardware video encoder for transcoding; a container cannot reach it. Posters, thumbnails and the database stay on the internal SSD, so browsing never touches the cloud. Chosen over Jellyfin for the polish of its TV apps; Jellyseerr speaks to both, so the choice stays reversible.'},
+ {id:'docker',g:'On the box',c:'sky',ic:'box',name:'The little boxes inside the box',real:'Docker + Colima',
+  plain:'Each app lives in its own sealed compartment with exactly what it needs. One can be updated or restarted without touching the others.',
+  tech:'Ten containers from one compose file. Docker is Linux-native, so on macOS Colima runs a small Linux VM (Apple’s Virtualization framework) and the containers live inside it. Only the media folder is mounted into the VM. Everything is loopback-bound; the request app is the single deliberate exception.'},
+ {id:'mini',g:'On the box',c:'sky',ic:'mac',name:'The box in the house',real:'Mac mini (M4)',
+  plain:'A small silver computer that stays on all the time with no screen attached. Everything on this page runs on it or passes through it.',
+  tech:'An M4 Mac mini, headless, always on. Runs Plex natively, the container stack, the assistant, and a few background jobs (health sweep, quality-rule sync, the cloud mover). Chosen over a rented cloud server because hardware transcoding for unpredictable family devices is a requirement only this chip meets at the price.'},
+ {id:'tailscale',g:'On the box',c:'plum',ic:'tunnel',name:'The private tunnel to the box',real:'Tailscale',
+  plain:'A private connection that only Nick’s devices and the assistant can use, from anywhere. Nothing on the box is open to the internet.',
+  tech:'Tailscale, with device approval on and a default-deny access policy. Nick’s identity reaches everything; a shared guest reaches exactly two things, Plex and the request app, and nothing else. No public exposure of any admin interface.'},
+ {id:'disk',g:'Where the file lives',c:'ember',ic:'disk',name:'The small fast disk',real:'Internal SSD, staging',new:true,
+  plain:'New files land here first. It is fast but small, so nothing stays for long.',
+  tech:'Downloads and the local branch of the library share one filesystem on the boot SSD, so imports can hard-link. An hourly mover copies anything older than about six hours to cloud storage, verifies it, and removes the local copy; it also runs early if the disk passes 60% full.'},
+ {id:'cloud',g:'Where the file lives',c:'sky',ic:'cloud',name:'The cloud shelf',real:'AWS S3 + CloudFront',new:true,
+  plain:'Where the library actually lives long-term. It grows as needed without buying drives, and a file is kept in three places at once. When you press play, the box streams it from here.',
+  tech:'An S3 bucket (Intelligent-Tiering, versioned) fronted by CloudFront for cheap reads. The local branch and the cloud branch are merged into one folder on the box, so Plex and the librarians see a single library at the same paths as before; no database changes. Reads come through CloudFront with a locked-down origin. Cost today is a few dollars a month.'},
+ {id:'asst',g:'The assistant',c:'plum',ic:'spark',name:'The assistant',real:'Claude, on the box',
+  plain:'A Claude assistant that lives on the box, checks on everything every half hour, fixes what it can, and tells Nick about what it cannot. Nick talks to it from his phone.',
+  tech:'Runs as its own unprivileged user with no admin rights. Two entry points: a webhook from the librarians on failures, and a scheduled sweep. It acts freely inside the media domain (clear a queue item, re-grab, manual import, trigger a scan), leaves an audit note for config changes, and never touches the host, the network or anything non-media; those go to an inbox Nick reads. Reached interactively from Nick’s phone through the Claude app.'}
+];
+
+/* map layout: x,y = centre of node box in a 390x420 viewBox */
+const LAYOUT = {
+  phone:   [62, 40],  sonarr:[195, 40],  prowlarr:[328, 40],
+  usenet:  [290,118], torrent:[130,118],
+  bazarr:  [62,196],  disk:[195,196],   cloud:[328,196],
+  plex:    [130,274], tv:[290,274],
+  asst:    [195,366]
+};
+const LABEL = {phone:'Your phone',sonarr:'Librarians',prowlarr:'The index',usenet:'Fast lane',torrent:'Shared lane',bazarr:'Subtitles',disk:'Local disk',cloud:'Cloud',plex:'Plex',tv:'Fire TV',asst:'Assistant'};
+const WIRES = [['phone','sonarr'],['sonarr','prowlarr'],['prowlarr','usenet'],['prowlarr','torrent'],['usenet','disk'],['torrent','disk'],['disk','bazarr'],['disk','cloud'],['disk','plex'],['cloud','plex'],['plex','tv'],['tv','asst']];
+
+const STEPS = [
+ {at:'phone',who:'You, on the couch',say:'You open the request app, find the show, and tap Request.',
+  tech:'Jellyseerr creates a request tied to your Plex login. Depending on the account it is approved automatically or waits for Nick.',wire:null},
+ {at:'sonarr',who:'The TV librarian',say:'The request lands with the TV librarian. Movies go to the movie librarian instead.',
+  tech:'Jellyseerr calls Sonarr’s API: add the series with the default quality profile and the anime or TV root folder, monitor the requested seasons, and search now.',wire:['phone','sonarr']},
+ {at:'prowlarr',who:'The index',say:'The librarian asks the index: where can I get this, and which copy is best?',
+  tech:'Sonarr queries every indexer Prowlarr has synced to it, scores each release against the quality profile and the custom formats Recyclarr keeps current, and picks the top one.',wire:['sonarr','prowlarr']},
+ {at:'usenet',who:'The fast lane',say:'Most of the time the file comes down the fast lane from the paid archive, in a minute or two.',
+  tech:'Sonarr hands the NZB to SABnzbd, which downloads over SSL from Newshosting, verifies and repairs the pieces, and unpacks into the completed folder.',wire:['prowlarr','usenet']},
+ {at:'torrent',who:'The shared lane',say:'If the archive does not have it, the shared lane fetches it from other people, inside the privacy tunnel.',
+  tech:'The torrent goes to qBittorrent, whose only network is the Gluetun VPN container. If the tunnel drops, transfer stops; it cannot leak.',wire:['prowlarr','torrent']},
+ {at:'disk',who:'The librarian again',say:'The finished file is filed on the box’s small fast disk, renamed so the TV app understands it.',
+  tech:'Sonarr imports: hard-link where possible, else copy, into the local library branch with a clean name. Plex is notified to scan. A failure here fires a webhook to the assistant.',wire:['usenet','disk']},
+ {at:'bazarr',who:'The subtitle fetcher',say:'Subtitles get fetched to match, so a subtitled-only anime is ready to watch.',
+  tech:'Bazarr sees the new file in Sonarr and searches its providers for matching subtitles. (Still being configured.)',wire:['disk','bazarr']},
+ {at:'plex',who:'Plex',say:'Plex notices the new episode, grabs the poster and description, and adds it to the library.',
+  tech:'The scan picks up the file, matches it against metadata, and generates thumbnails. Posters and the database live on the internal SSD, never in the cloud.',wire:['disk','plex']},
+ {at:'tv',who:'The Fire TV',say:'It shows up on the TV under Recently Added. Play.',
+  tech:'The Plex client asks the server for the stream. If the device can play the original format, the file is sent as-is; otherwise the M4 converts it on the fly.',wire:['plex','tv']},
+ {at:'cloud',who:'A few hours later',say:'Quietly, the file moves from the small disk to the cloud shelf. Playing it looks exactly the same.',
+  tech:'The hourly mover copies files older than about six hours to S3, verifies, and deletes the local copy. The union mount means the path never changes; playback now streams through CloudFront.',wire:['disk','cloud']},
+ {at:'asst',who:'The assistant',say:'The assistant watched the whole way. Had anything stuck, it would have unstuck it, or told Nick.',
+  tech:'Every 30 minutes it sweeps containers, disk, VPN and indexers. On a webhook it walks this exact path to the failing step, acts within the media domain, and writes anything bigger to Nick’s inbox.',wire:['tv','asst']}
+];
+
+/* ------------------------------------------------------------------ map */
+const NS='http://www.w3.org/2000/svg';
+const $=(s,r=document)=>r.querySelector(s);
+const nodesG=$('#nodes'), wiresG=$('#wires'), marker=$('#marker');
+const W=110,H=52;
+const wireEls={};
+function el(t,a={}){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e}
+function key(a,b){return a+'>'+b}
+for(const [a,b] of WIRES){
+  const [ax,ay]=LAYOUT[a],[bx,by]=LAYOUT[b];
+  let d;
+  if(Math.abs(ay-by)<1){ const sgn=bx>ax?1:-1; d=`M${ax+sgn*W/2} ${ay}L${bx-sgn*W/2} ${by}`; }
+  else{ const my=(ay+by)/2; d=`M${ax} ${ay+H/2}C${ax} ${my} ${bx} ${my} ${bx} ${by-H/2}`; }
+  const p=el('path',{d,class:'wire'}); wiresG.appendChild(p); wireEls[key(a,b)]=p;
+}
+const nodeEls={};
+for(const id in LAYOUT){
+  const [x,y]=LAYOUT[id];
+  const g=el('g',{class:'node',tabindex:'0',role:'button','data-id':id,'aria-label':LABEL[id]+'. Open details'});
+  g.appendChild(el('rect',{x:x-W/2,y:y-H/2,width:W,height:H,rx:14}));
+  const ic=el('g',{class:'ic',transform:`translate(${x-W/2+10},${y-11}) scale(0.92)`});
+  ic.innerHTML=ICONS[PARTS.find(p=>p.id===id).ic]; g.appendChild(ic);
+  const t=el('text',{x:x-W/2+36,y:y+4}); t.textContent=LABEL[id]; g.appendChild(t);
+  g.addEventListener('click',()=>openSheet(id));
+  g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openSheet(id)}});
+  nodesG.appendChild(g); nodeEls[id]=g;
+}
+
+/* ------------------------------------------------------------------ journey */
+let step=0, mode='plain', playing=false, playTimer=null, anim=null;
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sStep=$('#sStep'),sWho=$('#sWho'),sSay=$('#sSay'),sTech=$('#sTech'),count=$('#count'),dots=$('#dots'),peekLbl=$('#peekLbl');
+STEPS.forEach((s,i)=>{const b=document.createElement('button');b.type='button';b.setAttribute('role','tab');b.setAttribute('aria-label',`Step ${i+1}`);b.innerHTML='<i></i>';b.addEventListener('click',()=>go(i));dots.appendChild(b)});
+
+function setMarker(x,y){marker.setAttribute('transform',`translate(${x},${y})`)}
+function anchor(id){const [x,y]=LAYOUT[id];return [x+W/2-4,y-H/2+4]}
+function moveMarker(from,to){
+  if(anim)cancelAnimationFrame(anim);
+  const [ax,ay]=LAYOUT[from],[bx,by]=LAYOUT[to];
+  if(reduce||from===to){setMarker(...anchor(to));return}
+  const p=wireEls[key(from,to)]||wireEls[key(to,from)];
+  const t0=performance.now(),dur=650;
+  const tick=now=>{
+    const k=Math.min(1,(now-t0)/dur), e=k<.5?2*k*k:-1+(4-2*k)*k;
+    if(p){const L=p.getTotalLength(); const rev=!wireEls[key(from,to)]; const pt=p.getPointAtLength((rev?1-e:e)*L); setMarker(pt.x,pt.y)}
+    else setMarker(ax+(bx-ax)*e, ay+(by-ay)*e);
+    if(k<1)anim=requestAnimationFrame(tick); else setMarker(...anchor(to));
+  };
+  anim=requestAnimationFrame(tick);
+}
+function render(prevAt){
+  const s=STEPS[step];
+  sStep.textContent=`Step ${step+1} of ${STEPS.length}`;
+  sWho.innerHTML=`<b>${s.who}</b>`;
+  sSay.textContent=s.say;
+  sTech.textContent=s.tech; sTech.hidden=(mode!=='tech');
+  count.textContent=`${step+1} / ${STEPS.length}`;
+  peekLbl.textContent='About '+LABEL[s.at].toLowerCase();
+  $('#next').innerHTML = step===STEPS.length-1 ? 'Start over' : 'Next <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+  $('#prev').disabled = step===0;
+  for(const id in nodeEls){nodeEls[id].classList.remove('on','done')}
+  STEPS.slice(0,step).forEach(x=>nodeEls[x.at].classList.add('done'));
+  nodeEls[s.at].classList.add('on');
+  for(const k in wireEls)wireEls[k].classList.remove('lit');
+  if(s.wire){const w=wireEls[key(s.wire[0],s.wire[1])];if(w)w.classList.add('lit')}
+  [...dots.children].forEach((b,i)=>{if(i===step)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current');b.classList.toggle('done',i<step)});
+  moveMarker(prevAt||s.at, s.at);
+}
+function go(i){const prevAt=STEPS[step].at; step=(i+STEPS.length)%STEPS.length; render(prevAt)}
+$('#next').addEventListener('click',()=>{stopPlay();go(step+1)});
+$('#prev').addEventListener('click',()=>{stopPlay();go(step-1)});
+function stopPlay(){playing=false;clearTimeout(playTimer);$('#play').setAttribute('aria-pressed','false');$('#play').innerHTML='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';$('#play').setAttribute('aria-label','Play through all steps')}
+function startPlay(){playing=true;$('#play').setAttribute('aria-pressed','true');$('#play').innerHTML='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>';$('#play').setAttribute('aria-label','Pause');
+  const tickP=()=>{if(!playing)return; if(step===STEPS.length-1){stopPlay();return} go(step+1); playTimer=setTimeout(tickP, mode==='tech'?5200:3400)};
+  if(step===STEPS.length-1)go(0);
+  playTimer=setTimeout(tickP,3000)}
+$('#play').addEventListener('click',()=>playing?stopPlay():startPlay());
+$('#peekBtn').addEventListener('click',()=>openSheet(STEPS[step].at));
+function setMode(m){mode=m;$('#modePlain').setAttribute('aria-pressed',m==='plain');$('#modeTech').setAttribute('aria-pressed',m==='tech');sTech.hidden=(m!=='tech');
+  document.querySelectorAll('.card').forEach(c=>{if(m==='tech')c.open=true});
+  try{localStorage.setItem('media-pipeline-mode-v1',m)}catch(e){}}
+$('#modePlain').addEventListener('click',()=>setMode('plain'));
+$('#modeTech').addEventListener('click',()=>setMode('tech'));
+document.addEventListener('keydown',e=>{if(sheetOpen)return;if(e.key==='ArrowRight'){stopPlay();go(step+1)}if(e.key==='ArrowLeft'){stopPlay();go(step-1)}});
+
+/* show the control bar only while the journey is on screen */
+const bar=$('#bar');
+new IntersectionObserver(es=>{es.forEach(x=>bar.classList.toggle('show',x.isIntersecting))},{threshold:.15}).observe($('#journey'));
+
+/* ------------------------------------------------------------------ parts */
+const groups=$('#groups');
+const order=['Your side','The librarians','How files arrive','The cleanup crew','On the box','Where the file lives','The assistant'];
+for(const g of order){
+  const wrap=document.createElement('div');wrap.className='group';
+  wrap.innerHTML=`<h3>${g}</h3><div class="cards"></div>`;
+  const cards=$('.cards',wrap);
+  PARTS.filter(p=>p.g===g).forEach(p=>{
+    const d=document.createElement('details');d.className=`card c-${p.c}`;d.id='part-'+p.id;
+    d.innerHTML=`<summary><span class="glyph"><svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[p.ic]}</svg></span><span class="t"><b>${p.name}${p.new?'<i class="tag new">new</i>':''}${p.soon?'<i class="tag soon">setting up</i>':''}</b><span>${p.real}</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary><div class="body"><p>${p.plain}</p><p class="real">Real name: <b>${p.real}</b></p><div class="hood"><span class="lbl">Under the hood</span>${p.tech}</div></div>`;
+    cards.appendChild(d);
+  });
+  groups.appendChild(wrap);
+}
+
+/* ------------------------------------------------------------------ sheet */
+const sheet=$('#sheet'),veil=$('#veil');let sheetOpen=false,lastFocus=null;
+function openSheet(id){
+  const p=PARTS.find(x=>x.id===id);if(!p)return;
+  lastFocus=document.activeElement;
+  $('#shGlyph').className='glyph';$('#shGlyph').style.background=`var(--${p.c}-soft)`;$('#shGlyph').style.color=`var(--${p.c})`;
+  $('#shGlyph').innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[p.ic]}</svg>`;
+  $('#shTitle').textContent=p.name;$('#shSub').textContent=p.real+(p.soon?' · setting up':'')+(p.new?' · new':'');
+  $('#shBody').innerHTML=`<p>${p.plain}</p><div class="hood"><span class="lbl">Under the hood</span>${p.tech}</div>`;
+  sheet.hidden=false;requestAnimationFrame(()=>{sheet.classList.add('show');veil.classList.add('show')});
+  sheetOpen=true;$('#shClose').focus();
+}
+function closeSheet(){sheet.classList.remove('show');veil.classList.remove('show');sheetOpen=false;setTimeout(()=>{sheet.hidden=true},300);if(lastFocus&&lastFocus.focus)lastFocus.focus()}
+$('#shClose').addEventListener('click',closeSheet);veil.addEventListener('click',closeSheet);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&sheetOpen)closeSheet()});
+let sy=0;sheet.addEventListener('touchstart',e=>{sy=e.touches[0].clientY},{passive:true});
+sheet.addEventListener('touchend',e=>{if(sheet.scrollTop<=0&&e.changedTouches[0].clientY-sy>70)closeSheet()});
+
+/* ------------------------------------------------------------------ boot */
+try{const m=localStorage.getItem('media-pipeline-mode-v1');if(m==='tech'||m==='plain')setMode(m)}catch(e){}
+setMarker(...anchor('phone'));render();
+</script>
+</body>
+</html>
